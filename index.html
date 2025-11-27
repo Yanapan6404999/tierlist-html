@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Tier List</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #161616;
+      color: white;
+      padding: 20px;
+    }
+
+    #container {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #upload {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #222;
+      border: 2px dashed #555;
+      border-radius: 10px;
+    }
+
+    #image-pool {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .champ-img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border: 2px solid #777;
+      border-radius: 6px;
+      cursor: grab;
+    }
+
+    .tier-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 30px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    .tier-table th {
+      background: #333;
+      padding: 10px;
+      text-align: center;
+      font-size: 18px;
+      border-right: 1px solid #444;
+    }
+
+    .tier-label {
+      width: 60px;
+      font-weight: bold;
+      text-align: center;
+      font-size: 22px;
+      color: white;
+    }
+
+    /* สีของแต่ละ tier */
+    tr.s-row td:nth-child(1) { background: #d7263d; }
+    tr.a-row td:nth-child(1) { background: #f97316; }
+    tr.b-row td:nth-child(1) { background: #2563eb; }
+    tr.f-row td:nth-child(1) { background: #6b7280; }
+
+    /* ช่อง drop */
+    .dropzone {
+      height: 150px;
+      padding: 10px;
+      border-left: 1px solid #444;
+      background: #1f1f1f;
+      vertical-align: top;
+    }
+
+    .dropzone:hover {
+      background: #2a2a2a;
+      transition: 0.1s;
+    }
+
+    /* ปุ่ม export */
+    #exportBtn {
+      margin-top: 25px;
+      padding: 10px 20px;
+      border: none;
+      background: #22c55e;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    #exportBtn:hover {
+      background: #16a34a;
+    }
+
+  </style>
+</head>
+
+<body>
+<div id="container">
+
+  <h1>Tier List Drag & Drop</h1>
+
+  <div id="upload">
+    <label>อัปโหลดรูป: </label>
+    <input type="file" id="fileInput" multiple accept="image/*">
+    <div id="image-pool"></div>
+  </div>
+
+  <div id="tier-area">
+    <table class="tier-table">
+      <tr>
+        <th></th>
+        <th>Top</th>
+        <th>Jungle</th>
+        <th>Mid</th>
+        <th>ADC</th>
+        <th>Support</th>
+      </tr>
+
+      <tr class="s-row">
+        <td class="tier-label">S</td>
+        <td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td>
+      </tr>
+
+      <tr class="a-row">
+        <td class="tier-label">A</td>
+        <td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td>
+      </tr>
+
+      <tr class="b-row">
+        <td class="tier-label">B</td>
+        <td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td>
+      </tr>
+
+      <tr class="f-row">
+        <td class="tier-label">F</td>
+        <td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td><td class="dropzone"></td>
+      </tr>
+    </table>
+  </div>
+
+  <button id="exportBtn">Export เป็นรูป PNG</button>
+
+</div>
+
+<!-- html2canvas CDN -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+  const fileInput = document.getElementById("fileInput");
+  const imagePool = document.getElementById("image-pool");
+
+  fileInput.addEventListener("change", function () {
+    [...this.files].forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.className = "champ-img";
+        img.draggable = true;
+        imagePool.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  document.addEventListener("dragstart", e => {
+    if (e.target.classList.contains("champ-img")) {
+      e.dataTransfer.setData("text/plain", e.target.src);
+    }
+  });
+
+  document.querySelectorAll(".dropzone").forEach(zone => {
+    zone.addEventListener("dragover", e => e.preventDefault());
+    
+    zone.addEventListener("drop", e => {
+      e.preventDefault();
+      const src = e.dataTransfer.getData("text/plain");
+
+      const img = document.querySelector(`img[src="${src}"]`);
+      if (img) zone.appendChild(img);
+    });
+  });
+
+  // Export PNG
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const element = document.getElementById("tier-area");
+    html2canvas(element).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'tierlist.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  });
+
+</script>
+
+</body>
+</html>
